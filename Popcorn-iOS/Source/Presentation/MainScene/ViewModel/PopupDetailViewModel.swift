@@ -99,13 +99,17 @@ extension PopupDetailViewModel {
 
     func fetchPopupReview() {
         let popupId = dataSource.getPopupId()
-        useCase.fetchPopupReviews(popupId: popupId, page: reviewPage) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let popupReviewList):
-                self.dataSource.updateReviewData(popupReviewList)
-            case .failure:
+        Task {
+            do {
+                let popupReviewList = try await useCase.fetchPopupReviews(popupId: popupId, page: reviewPage)
+                dataSource.updateReviewData(popupReviewList)
+            } catch {
                 dataSource.showPlaceholderReviewData()
+                if let error = error as? NetworkError {
+                    print(#function, error.description)
+                } else {
+                    print(#function, error)
+                }
             }
         }
         popupReviewPublisher?()

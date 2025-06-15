@@ -10,7 +10,7 @@ protocol PopupDetailUseCaseProtocol {
         for popupId: Int
     ) async throws -> (PopupInformation, PopupRatingDistribution, PopupReviewList)
 
-    func fetchPopupReviews(popupId: Int, page: Int, completion: @escaping (Result<PopupReviewList, Error>) -> Void)
+    func fetchPopupReviews(popupId: Int, page: Int) async throws -> PopupReviewList
 
     func togglePopupPick(popupId: Int, completion: @escaping (Result<Bool, Error>) -> Void)
 

@@ -24,11 +24,9 @@ final class PopupDetailUseCase: PopupDetailUseCaseProtocol {
 
     func fetchPopupReviews(
         popupId: Int,
-        page: Int,
-        completion: @escaping (Result<PopupReviewList, any Error>
-        ) -> Void
-    ) {
-        repository.fetchPopupReviews(popupId: popupId, page: page, completion: completion)
+        page: Int
+    ) async throws -> PopupReviewList {
+        return try await repository.fetchReviewList(popupId: popupId, page: page)
     }
 
     func togglePopupPick(popupId: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
