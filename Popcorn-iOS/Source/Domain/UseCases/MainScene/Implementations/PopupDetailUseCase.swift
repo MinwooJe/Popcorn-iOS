@@ -15,20 +15,11 @@ final class PopupDetailUseCase: PopupDetailUseCaseProtocol {
     }
 
     func fetchPopupAllData(
-        popupId: Int,
-        completion: @escaping (Result<(PopupInformation, PopupRatingDistribution, PopupReviewList), Error>
-        ) -> Void) {
-        repository.fetchPopupAllData(popupId: popupId) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let (popupInfo, popupRatingDistribution, popupReviewList)):
-                var popupInfo = popupInfo
-                popupInfo.hashTags = self.extractHashTag(from: popupInfo)
-                completion(.success((popupInfo, popupRatingDistribution, popupReviewList)))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
+        for popupId: Int
+    ) async throws -> (PopupInformation, PopupRatingDistribution, PopupReviewList) {
+        var (information, ratingDistribution, reviewList) = try await repository.fetchPopupAllData(for: popupId)
+        information.hashTags = extractHashTag(from: information)
+        return (information, ratingDistribution, reviewList)
     }
 
     func fetchPopupReviews(

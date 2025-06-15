@@ -17,126 +17,22 @@ final class PopupDetailRepository: PopupDetailRepositoryProtocol {
     }
 
     func fetchPopupAllData(
-        popupId: Int,
-        completion: @escaping (Result<(PopupInformation, PopupRatingDistribution, PopupReviewList), any Error>
-        ) -> Void) {
+        for popupId: Int
+    ) async throws -> (PopupInformation, PopupRatingDistribution, PopupReviewList) {
         // TODO: TokenRepository에서 access token 만료 시 자동으로 reissue 하는 로직 구현 후 리팩토링
         guard let token = tokenRepository.fetchAccessToken() else {
-            completion(.failure(NSError(
+            throw NSError(
                 domain: "PopupDetailRepository",
                 code: -1,
                 userInfo: [NSLocalizedDescriptionKey: "액세스 토큰 만료"]
-            )))
-            return
+            )
         }
 
-        let dispatchGroup = DispatchGroup()
-        var capturedErrors = [NetworkError]()
-        let lock = NSLock()
+        async let information = fetchInformation(popupId: popupId, token: token)
+        async let ratingDistribution = fetchRatingDistribution(popupId: popupId, token: token)
+        async let reviewList = fetchReviewList(popupId: popupId, token: token)
 
-        var popupInformationResponse: PopupInformationResponseDTO?
-        var popupRatingDistributionResponse: PopupRatingDistributionResponseDTO?
-        var popupReviewListResponse: PopupReviewListResponseDTO?
-
-        let popupInformationEndpoint = Endpoint<PopupInformationResponseDTO>(
-            httpMethod: .get,
-            path: APIConstant.popupDetailPath(popupId: APIConstant.popupDetailPath(popupId: String(popupId))),
-            headers: ["Authorization": "Bearer \(token)"]
-        )
-
-        let popupRatingDistributionEndpoint = Endpoint<PopupRatingDistributionResponseDTO>(
-            httpMethod: .get,
-            path: APIConstant.popupRatingPath(popupId: String(popupId))
-        )
-
-        let popupReviewListEndpoint = Endpoint<PopupReviewListResponseDTO>(
-            httpMethod: .get,
-            path: APIConstant.popupReviewPath(popupId: String(popupId)),
-            queryItems: [URLQueryItem(name: "page", value: "1")],
-            headers: ["Authorization": "Bearer \(token)"]
-        )
-
-        dispatchGroup.enter()
-        networkManager.request(endpoint: popupInformationEndpoint) { result in
-            lock.lock()
-            defer {
-                lock.unlock()
-                dispatchGroup.leave()
-            }
-
-            if !capturedErrors.isEmpty { return }
-
-            switch result {
-            case .success(let response):
-                popupInformationResponse = response
-            case .failure(let error):
-                capturedErrors.append(error)
-            }
-        }
-
-        dispatchGroup.enter()
-        networkManager.request(endpoint: popupRatingDistributionEndpoint) { result in
-            lock.lock()
-            defer {
-                lock.unlock()
-                dispatchGroup.leave()
-            }
-
-            if !capturedErrors.isEmpty { return }
-
-            switch result {
-            case .success(let response):
-                popupRatingDistributionResponse = response
-            case .failure(let error):
-                capturedErrors.append(error)
-            }
-        }
-
-        dispatchGroup.enter()
-        networkManager.request(endpoint: popupReviewListEndpoint) { result in
-            lock.lock()
-            defer {
-                lock.unlock()
-                dispatchGroup.leave()
-            }
-
-            if !capturedErrors.isEmpty { return }
-
-            switch result {
-            case .success(let response):
-                popupReviewListResponse = response
-            case .failure(let error):
-                capturedErrors.append(error)
-            }
-        }
-
-        dispatchGroup.notify(queue: .main) {
-            if !capturedErrors.isEmpty {
-                let combinedError = NSError(
-                    domain: "PopupDetailRepsitory",
-                    code: -2,
-                    userInfo: [
-                        NSLocalizedDescriptionKey: "상세화면 데이터 요청 실패",
-                        "error": capturedErrors
-                    ]
-                )
-
-                completion(.failure(combinedError))
-                return
-            }
-
-            guard let popupInformationResponse,
-                  let popupRatingDistributionResponse,
-                  let popupReviewListResponse else { return }
-
-            let popupReviewList = PopupReviewList(reviews: popupReviewListResponse.reviews.map { $0.toEntity() })
-
-            completion(.success((
-                popupInformationResponse.toEntity(),
-                popupRatingDistributionResponse.toEntity(),
-                popupReviewList
-            )))
-        }
+        return try await (information, ratingDistribution, reviewList)
     }
 
     func fetchPopupReviews(
@@ -206,7 +102,7 @@ extension PopupDetailRepository {
         print(popupId)
         let endpoint = Endpoint<PopupInformationResponseDTO>(
             httpMethod: .get,
-            path: APIConstant.popupDetailPath(popupId: String(1)),
+            path: APIConstant.popupDetailPath(popupId: String(1)),      // TODO: - 서버 데이터 변경 후 1을 popupId로 변경
             headers: ["Authorization": "Bearer \(token)"]
         )
 

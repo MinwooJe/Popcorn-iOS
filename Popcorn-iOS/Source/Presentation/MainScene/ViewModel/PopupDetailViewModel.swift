@@ -74,21 +74,27 @@ extension PopupDetailViewModel {
         imageFetchUseCase.fetchImage(url: url, completion: completion)
     }
 
-    func fetchPopupInformation() {
-        popupDetailUseCase.fetchPopupAllData { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let (popupInformation, popupRatingDistribution, popupReviewList)):
-                self.popupDetailDataSource.updateInformationData(popupInformation)
-                self.popupDetailDataSource.updateRatingData(popupRatingDistribution)
-                self.popupDetailDataSource.updateReviewData(popupReviewList)
-            case .failure:
+    func fetchPopupDetail(for popupId: Int) {
+        Task {
+            do {
+                let (information, ratingDistribution, reviewList) = try await popupDetailUseCase.fetchPopupAllData(for: popupId)
+                popupDetailDataSource.updateInformationData(information)
+                popupDetailDataSource.updateRatingData(ratingDistribution)
+                popupDetailDataSource.updateReviewData(reviewList)
+            } catch {
                 popupDetailDataSource.showPlaceholderData()
+
+                if let error = error as? NetworkError {
+                    print(#function, error.description)
+                } else {
+                    print(#function, error)
+                }
             }
+
+            carouselImagePublisher?()
+            popupInformationPublisher?()
+            popupReviewPublisher?()
         }
-        carouselImagePublisher?()
-        popupInformationPublisher?()
-        popupReviewPublisher?()
     }
 
     func fetchPopupReview() {

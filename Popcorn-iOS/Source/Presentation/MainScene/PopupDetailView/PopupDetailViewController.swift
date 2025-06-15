@@ -39,7 +39,7 @@ final class PopupDetailViewController: UIViewController {
         configureSubviews()
         configureLayout()
         bind(to: viewModel)
-        mockingData()
+        viewModel.fetchPopupDetail(for: popupId)
     }
 
     private func bind(to viewModel: PopupDetailViewModel) {
