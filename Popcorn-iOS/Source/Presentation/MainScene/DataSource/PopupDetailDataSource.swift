@@ -46,7 +46,10 @@ extension PopupDetailDataSource {
     }
 
     func popupImageItem(at indexPath: IndexPath) -> String {
-        guard let popupMainInformation else { return "" }
+        guard let popupMainInformation,
+              indexPath.row < popupMainInformation.popupImagesUrl.count
+        else { return "" }
+        
         return popupMainInformation.popupImagesUrl[indexPath.row]
     }
 
