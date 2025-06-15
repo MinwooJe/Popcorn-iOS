@@ -14,6 +14,7 @@ struct PopupInformationResponseDTO: Decodable {
     let startDate: String
     let endDate: String
     let isPick: Bool
+    let hashtag: String
 
     let address: String
     let officialLink: String
@@ -28,12 +29,13 @@ struct PopupInformationResponseDTO: Decodable {
         case startDate = "startedAt"
         case endDate = "endedAt"
         case isPick = "isLiked"
+        case hashtag = "interest"
 
         case address = "location"
         case officialLink = "organizerUrl"
-        case businesesHours = "hours"
-        case introduce = "contents"
-        case reservationUrl
+        case businesesHours = "business_hours"
+        case introduce = "content"
+        case reservationUrl = "reservationUrl"
     }
 }
 
@@ -50,7 +52,7 @@ extension PopupInformationResponseDTO {
             startDate: startDate,
             endDate: endDate,
             isPick: isPick,
-            hashTags: [],
+            hashTags: [hashtag],
             address: address,
             organizationUrl: officialLink,
             businesesHours: businesesHours,
