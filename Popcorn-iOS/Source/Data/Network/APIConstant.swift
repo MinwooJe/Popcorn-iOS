@@ -47,11 +47,11 @@ struct APIConstant {
     }
 
     static func popupRatingPath(popupId: String) -> String {
-        return "/popups/reviewrating/\(popupId)"
+        return "/api/popups/reviewrating/\(popupId)"
     }
 
     static func popupReviewPath(popupId: String) -> String {
-        return "/popups/reviews/\(popupId)"
+        return "/api/reviews/popups/\(popupId)"
     }
 
     static func popupReviewToggleLike(popupId: String) -> String {
