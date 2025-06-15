@@ -9,8 +9,8 @@ import Foundation
 
 final class PopupDetailViewModel: MainCarouselViewModelProtocol {
     private let imageFetchUseCase: ImageFetchUseCaseProtocol
-    private let popupDetailUseCase: PopupDetailUseCaseProtocol
-    private let popupDetailDataSource: PopupDetailDataSource
+    private let useCase: PopupDetailUseCaseProtocol
+    private let dataSource: PopupDetailDataSource
     private var reviewPage = 1
 
     // MARK: - Output
@@ -25,31 +25,31 @@ final class PopupDetailViewModel: MainCarouselViewModelProtocol {
          popupDetailDataSource: PopupDetailDataSource = PopupDetailDataSource()
     ) {
         self.imageFetchUseCase = imageFetchUseCase
-        self.popupDetailUseCase = popupDetailUseCase
-        self.popupDetailDataSource = popupDetailDataSource
+        self.useCase = popupDetailUseCase
+        self.dataSource = popupDetailDataSource
     }
 
     func getDataSource() -> PopupDetailDataSource {
-        return popupDetailDataSource
+        return dataSource
     }
 
     func isFinished() -> Bool {
-        return popupDetailDataSource.detailInformationItem().isFinished
+        return dataSource.detailInformationItem().isFinished
     }
 
     func isWriteReviewEnabled() -> Bool {
-        return popupDetailDataSource.detailInformationItem().isWriteReviewEnabled
+        return dataSource.detailInformationItem().isWriteReviewEnabled
     }
 }
 
 // MARK: - Input
 extension PopupDetailViewModel {
     func didTapPickButton(for popupId: Int) {
-        popupDetailUseCase.togglePopupPick(popupId: popupId) { [weak self] result in
+        useCase.togglePopupPick(popupId: popupId) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let isPick):
-                self.popupDetailDataSource.updatePickStatus(isPick)
+                self.dataSource.updatePickStatus(isPick)
                 popupPickPublisher?(isPick)
             case .failure(let error):
                 // TODO: 에러 UI 처리
@@ -77,12 +77,12 @@ extension PopupDetailViewModel {
     func fetchPopupDetail(for popupId: Int) {
         Task {
             do {
-                let (information, ratingDistribution, reviewList) = try await popupDetailUseCase.fetchPopupAllData(for: popupId)
-                popupDetailDataSource.updateInformationData(information)
-                popupDetailDataSource.updateRatingData(ratingDistribution)
-                popupDetailDataSource.updateReviewData(reviewList)
+                let (information, ratingDistribution, reviewList) = try await useCase.fetchPopupAllData(for: popupId)
+                dataSource.updateInformationData(information)
+                dataSource.updateRatingData(ratingDistribution)
+                dataSource.updateReviewData(reviewList)
             } catch {
-                popupDetailDataSource.showPlaceholderData()
+                dataSource.showPlaceholderData()
 
                 if let error = error as? NetworkError {
                     print(#function, error.description)
@@ -98,14 +98,14 @@ extension PopupDetailViewModel {
     }
 
     func fetchPopupReview() {
-        let popupId = popupDetailDataSource.getPopupId()
-        popupDetailUseCase.fetchPopupReviews(popupId: popupId, page: reviewPage) { [weak self] result in
+        let popupId = dataSource.getPopupId()
+        useCase.fetchPopupReviews(popupId: popupId, page: reviewPage) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let popupReviewList):
-                self.popupDetailDataSource.updateReviewData(popupReviewList)
+                self.dataSource.updateReviewData(popupReviewList)
             case .failure:
-                popupDetailDataSource.showPlaceholderReviewData()
+                dataSource.showPlaceholderReviewData()
             }
         }
         popupReviewPublisher?()
@@ -119,11 +119,11 @@ extension PopupDetailViewModel {
 // MARK: - Implement MainCarouselViewModelProtocol
 extension PopupDetailViewModel {
     func numbersOfCarouselImage() -> Int {
-        return popupDetailDataSource.numberOfCarouseImage()
+        return dataSource.numberOfCarouseImage()
     }
 
     func provideCarouselImageUrl(at indexPath: IndexPath) -> String {
-        return popupDetailDataSource.popupImageItem(at: indexPath)
+        return dataSource.popupImageItem(at: indexPath)
     }
 }
 

@@ -8,9 +8,9 @@
 import Foundation
 
 struct PopupInformationResponseDTO: Decodable {
-    let popupId: Int
-    let popupImagesUrl: [String]
-    let popupTitle: String
+    let id: Int
+    let imageUrls: [String]
+    let title: String
     let startDate: String
     let endDate: String
     let isPick: Bool
@@ -23,9 +23,9 @@ struct PopupInformationResponseDTO: Decodable {
     let reservationUrl: String
 
     enum CodingKeys: String, CodingKey {
-        case popupId
-        case popupImagesUrl = "popupImage"
-        case popupTitle = "title"
+        case id = "popupId"
+        case imageUrls = "popupImage"
+        case title
         case startDate = "startedAt"
         case endDate = "endedAt"
         case isPick = "isLiked"
@@ -46,9 +46,9 @@ extension PopupInformationResponseDTO {
         let endDate = DateFormatter.apiDateFormatter.date(from: endDate) ?? errorDate
 
         return PopupInformation(
-            id: popupId,
-            imageUrls: popupImagesUrl,
-            title: popupTitle,
+            id: id,
+            imageUrls: imageUrls,
+            title: title,
             startDate: startDate,
             endDate: endDate,
             isPick: isPick,
