@@ -45,15 +45,17 @@ final class PopupDetailViewModel: MainCarouselViewModelProtocol {
 // MARK: - Input
 extension PopupDetailViewModel {
     func didTapPickButton(for popupId: Int) {
-        useCase.togglePopupPick(popupId: popupId) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let isPick):
-                self.dataSource.updatePickStatus(isPick)
+        Task {
+            do {
+                let isPick = try await useCase.togglePopupPick(popupId: popupId)
+                dataSource.updatePickStatus(isPick)
                 popupPickPublisher?(isPick)
-            case .failure(let error):
-                // TODO: 에러 UI 처리
-                print("찜하기 실패: \(error)")
+            } catch {
+                if let error = error as? NetworkError {
+                    print(#function, error.description)
+                } else {
+                    print(#function, error)
+                }
             }
         }
     }

@@ -14,6 +14,6 @@ protocol PopupDetailRepositoryProtocol {
 
     func fetchReviewList(popupId: Int, page: Int) async throws -> PopupReviewList
 
-    func togglePopupPick(popupId: Int, completion: @escaping (Result<Bool, Error>) -> Void)
+    func togglePopupPick(popupId: Int) async throws -> Bool
     //  리뷰 좋아요 토글, 리뷰 작성 추가
 }
