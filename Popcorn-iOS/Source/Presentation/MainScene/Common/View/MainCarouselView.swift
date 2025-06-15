@@ -53,8 +53,10 @@ final class MainCarouselView: UIView {
     private func bind(to viewModel: MainCarouselViewModelProtocol) {
         viewModel.carouselImagePublisher = { [weak self] in
             guard let self else { return }
-            self.imagePageControl.numberOfPages = viewModel.numbersOfCarouselImage()
-            self.carouselCollectionView.reloadData()
+            DispatchQueue.main.async {
+                self.imagePageControl.numberOfPages = viewModel.numbersOfCarouselImage()
+                self.carouselCollectionView.reloadData()
+            }
         }
     }
 
