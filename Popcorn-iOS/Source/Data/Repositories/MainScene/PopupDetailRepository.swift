@@ -200,3 +200,52 @@ final class PopupDetailRepository: PopupDetailRepositoryProtocol {
         }
     }
 }
+
+extension PopupDetailRepository {
+    func fetchInformation(popupId: Int, token: String) async throws -> PopupInformation {
+        print(popupId)
+        let endpoint = Endpoint<PopupInformationResponseDTO>(
+            httpMethod: .get,
+            path: APIConstant.popupDetailPath(popupId: String(1)),
+            headers: ["Authorization": "Bearer \(token)"]
+        )
+
+        do {
+            return try await networkManager.request(endpoint: endpoint).toEntity()
+        } catch {
+            print(#function, error)
+            throw error
+        }
+    }
+
+    func fetchRatingDistribution(popupId: Int, token: String) async throws -> PopupRatingDistribution {
+        let endpoint = Endpoint<DefaultResponseDTO<PopupRatingDistributionResponseDTO>>(
+            httpMethod: .get,
+            path: APIConstant.popupRatingPath(popupId: String(popupId))
+        )
+
+        do {
+            return try await networkManager.request(endpoint: endpoint).data.toEntity()
+        } catch {
+            print(#function, error)
+            throw error
+        }
+    }
+
+    func fetchReviewList(popupId: Int, token: String) async throws -> PopupReviewList {
+        let endpoint = Endpoint<DefaultResponseDTO<PopupReviewListResponseDTO>>(
+            httpMethod: .get,
+            path: APIConstant.popupReviewPath(popupId: String(popupId)),
+            queryItems: [URLQueryItem(name: "page", value: "1")],
+            headers: ["Authorization": "Bearer \(token)"]
+        )
+
+        do {
+            let dto = try await networkManager.request(endpoint: endpoint).data
+            return PopupReviewList(reviews: dto.reviews.map { $0.toEntity() })
+        } catch {
+            print(#function, error)
+            throw error
+        }
+    }
+}
