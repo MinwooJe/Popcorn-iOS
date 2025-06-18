@@ -8,21 +8,21 @@
 @testable import Popcorn_iOS
 
 final class DummyPopupDetailRepository: PopupDetailRepositoryProtocol {
-    func togglePopupPick(popupId: Int, completion: @escaping (Result<Bool, any Error>) -> Void) {
+    func fetchPopupAllData(for popupId: Int) async throws -> (
+        PopupInformation,
+        PopupRatingDistribution,
+        PopupReviewList
+    ) {
+        throw NetworkError.emptyData
     }
     
-    func fetchPopupAllData(popupId: Int, completion: @escaping (
-        Result<(Popcorn_iOS.PopupInformation, Popcorn_iOS.PopupRatingDistribution,
-                Popcorn_iOS.PopupReviewList), any Error>) -> Void
-    ) {
-        completion(.failure(NetworkError.emptyData))
+    func fetchReviewList(popupId: Int, page: Int) async throws -> Popcorn_iOS.PopupReviewList {
+        throw NetworkError.emptyData
+
     }
     
-    func fetchPopupReviews(
-        popupId: Int,
-        page: Int,
-        completion: @escaping (Result<Popcorn_iOS.PopupReviewList, any Error>) -> Void
-    ) {
-        completion(.failure(NetworkError.emptyData))
+    func togglePopupPick(popupId: Int) async throws -> Bool {
+        throw NetworkError.emptyData
     }
+    
 }
